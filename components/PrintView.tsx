@@ -16,10 +16,14 @@ export const PrintView: React.FC<PrintViewProps> = ({ data, patient, consultant,
   const Field = ({ label, value }: { label: string, value: string }) => {
     if (!value || value === '<br>') return null;
     return (
-        <div className="mb-4">
-            <h4 className="font-bold text-gray-800 text-sm uppercase mb-1">{label}</h4>
-            <div className="text-sm text-gray-700 leading-relaxed" dangerouslySetInnerHTML={{ __html: value }} />
-        </div>
+        <tr className="border-b border-gray-200 break-inside-avoid">
+            <td className="py-2 pr-4 align-top w-[25%] font-bold text-gray-800 text-sm uppercase whitespace-nowrap">
+                {label}
+            </td>
+            <td className="py-2 align-top text-sm text-gray-700 leading-relaxed">
+                <div dangerouslySetInnerHTML={{ __html: value }} />
+            </td>
+        </tr>
     )
   }
 
@@ -44,7 +48,7 @@ export const PrintView: React.FC<PrintViewProps> = ({ data, patient, consultant,
             <div className="grid grid-cols-4 gap-4 text-sm">
                 <div>
                     <span className="font-bold block text-gray-500 text-xs">Patient Name</span>
-                    <span className="uppercase">{patient.name}</span>
+                    <span className="uppercase font-semibold">{patient.name}</span>
                 </div>
                 <div>
                     <span className="font-bold block text-gray-500 text-xs">Patient ID</span>
@@ -69,66 +73,81 @@ export const PrintView: React.FC<PrintViewProps> = ({ data, patient, consultant,
             </div>
           </div>
 
-          {/* Clinical Content */}
-          <div className="space-y-2">
-            <Field label="Chief Complaints" value={data.chiefComplaints} />
-            <Field label="History of Present Illness" value={data.historyOfIllness} />
-            <Field label="Examination" value={data.examination} />
-            
-            {(data.specificTests || data.xray || data.ct || data.mri || data.otherInvestigations) && (
-                <div className="mb-4">
-                    <h4 className="font-bold text-gray-800 text-sm uppercase mb-1">Investigations</h4>
-                    <div className="grid grid-cols-2 gap-4">
-                         {data.specificTests && <div><span className="font-semibold text-xs">Specific:</span> <span className="text-sm" dangerouslySetInnerHTML={{__html: data.specificTests}}/></div>}
-                         {data.xray && <div><span className="font-semibold text-xs">X-Ray:</span> <span className="text-sm" dangerouslySetInnerHTML={{__html: data.xray}}/></div>}
-                         {data.ct && <div><span className="font-semibold text-xs">CT:</span> <span className="text-sm" dangerouslySetInnerHTML={{__html: data.ct}}/></div>}
-                         {data.mri && <div><span className="font-semibold text-xs">MRI:</span> <span className="text-sm" dangerouslySetInnerHTML={{__html: data.mri}}/></div>}
-                    </div>
-                </div>
-            )}
+          {/* Clinical Content using Table Layout for Side-by-Side */}
+          <table className="w-full">
+            <tbody>
+                <Field label="Chief Complaints" value={data.chiefComplaints} />
+                <Field label="History of Illness" value={data.historyOfIllness} />
+                <Field label="Examination" value={data.examination} />
+                
+                {(data.specificTests || data.xray || data.ct || data.mri || data.otherInvestigations) && (
+                     <tr className="border-b border-gray-200 break-inside-avoid">
+                        <td className="py-2 pr-4 align-top w-[25%] font-bold text-gray-800 text-sm uppercase">
+                            Investigations
+                        </td>
+                        <td className="py-2 align-top text-sm text-gray-700">
+                             <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                                {data.specificTests && <div><span className="font-semibold text-xs">Specific:</span> <span dangerouslySetInnerHTML={{__html: data.specificTests}}/></div>}
+                                {data.xray && <div><span className="font-semibold text-xs">X-Ray:</span> <span dangerouslySetInnerHTML={{__html: data.xray}}/></div>}
+                                {data.ct && <div><span className="font-semibold text-xs">CT:</span> <span dangerouslySetInnerHTML={{__html: data.ct}}/></div>}
+                                {data.mri && <div><span className="font-semibold text-xs">MRI:</span> <span dangerouslySetInnerHTML={{__html: data.mri}}/></div>}
+                                {data.otherInvestigations && <div><span className="font-semibold text-xs">Other:</span> <span dangerouslySetInnerHTML={{__html: data.otherInvestigations}}/></div>}
+                             </div>
+                        </td>
+                    </tr>
+                )}
 
-            <Field label="Diagnosis" value={data.diagnosis} />
-            <Field label="Plan" value={data.plan} />
+                <Field label="Diagnosis" value={data.diagnosis} />
+                <Field label="Plan" value={data.plan} />
 
-            {data.medicines.length > 0 && (
-                <div className="mb-4">
-                    <h4 className="font-bold text-gray-800 text-sm uppercase mb-1">Rx (Medical Treatment)</h4>
-                    <table className="w-full text-sm border-collapse">
-                        <thead>
-                            <tr className="border-b border-gray-300">
-                                <th className="text-left py-1 w-10">SN</th>
-                                <th className="text-left py-1">Medicine</th>
-                                <th className="text-left py-1">Dose</th>
-                                <th className="text-left py-1">Interval</th>
-                                <th className="text-left py-1">Duration</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {data.medicines.map((m, i) => (
-                                <tr key={i} className="border-b border-gray-100">
-                                    <td className="py-1">{i + 1}</td>
-                                    <td className="py-1 font-medium">{m.name}</td>
-                                    <td className="py-1">{m.dose}</td>
-                                    <td className="py-1">{m.interval}</td>
-                                    <td className="py-1">{m.duration}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            )}
+                {data.medicines.length > 0 && (
+                     <tr className="border-b border-gray-200 break-inside-avoid">
+                        <td className="py-2 pr-4 align-top w-[25%] font-bold text-gray-800 text-sm uppercase">
+                            Rx (Treatment)
+                        </td>
+                        <td className="py-2 align-top text-sm text-gray-700">
+                            <table className="w-full text-sm border-collapse">
+                                <thead>
+                                    <tr className="border-b border-gray-300">
+                                        <th className="text-left py-1 w-8">SN</th>
+                                        <th className="text-left py-1">Medicine</th>
+                                        <th className="text-left py-1">Dose</th>
+                                        <th className="text-left py-1">Interval</th>
+                                        <th className="text-left py-1">Duration</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {data.medicines.map((m, i) => (
+                                        <tr key={i} className="border-b border-gray-100 last:border-0">
+                                            <td className="py-1">{i + 1}</td>
+                                            <td className="py-1 font-medium">{m.name}</td>
+                                            <td className="py-1">{m.dose}</td>
+                                            <td className="py-1">{m.interval}</td>
+                                            <td className="py-1">{m.duration}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                )}
 
-            <Field label="Physiotherapy" value={data.physiotherapy} />
-            
-            {data.nextReview && (
-                 <div className="mb-4">
-                    <h4 className="font-bold text-gray-800 text-sm uppercase mb-1">Next Review</h4>
-                    <p className="text-sm">{data.nextReview}</p>
-                </div>
-            )}
+                <Field label="Physiotherapy" value={data.physiotherapy} />
+                
+                {data.nextReview && (
+                    <tr className="border-b border-gray-200 break-inside-avoid">
+                         <td className="py-2 pr-4 align-top w-[25%] font-bold text-gray-800 text-sm uppercase">
+                            Next Review
+                        </td>
+                        <td className="py-2 align-top text-sm text-gray-700">
+                            {data.nextReview}
+                        </td>
+                    </tr>
+                )}
 
-            <Field label="Remarks" value={data.remarks} />
-          </div>
+                <Field label="Remarks" value={data.remarks} />
+            </tbody>
+          </table>
 
           {/* Footer / Signature */}
           <div className="mt-12 flex justify-end">

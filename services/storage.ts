@@ -1,38 +1,26 @@
-import { AppState, User, Patient, ExamData, UserRole } from '../types';
+import { HARDCODED_FIREBASE_CONFIG, hasHardcodedConfig } from '../config';
 
-const STORAGE_KEY = 'mediflow_db_v1';
+const CONFIG_KEY = 'mediflow_config_v1';
 
-const DEFAULT_USERS: User[] = [
-  { id: 'u1', username: 'recep', password: '123', fullName: 'Alice Receptionist', role: UserRole.RECEPTIONIST },
-  { id: 'u2', username: 'doc1', password: '123', fullName: 'Dr. Smith (Cardio)', role: UserRole.CONSULTANT },
-  { id: 'u3', username: 'doc2', password: '123', fullName: 'Dr. Jones (Ortho)', role: UserRole.CONSULTANT },
-];
+export interface AppConfig {
+  firebaseConfig?: any;
+}
 
-const INITIAL_STATE: AppState = {
-  currentUser: null,
-  users: DEFAULT_USERS,
-  patients: [],
-  visits: [],
-};
-
-export const loadState = (): AppState => {
-  const stored = localStorage.getItem(STORAGE_KEY);
-  if (stored) {
-    const parsed = JSON.parse(stored);
-    // Ensure users exist if storage was cleared or fresh
-    if (!parsed.users || parsed.users.length === 0) {
-      parsed.users = DEFAULT_USERS;
-    }
-    return { ...INITIAL_STATE, ...parsed, currentUser: null }; // Always start logged out
+export const loadConfig = (): AppConfig => {
+  // Priority 1: Check config.ts (Best for deployment)
+  if (hasHardcodedConfig) {
+    return { firebaseConfig: HARDCODED_FIREBASE_CONFIG };
   }
-  return INITIAL_STATE;
+
+  // Priority 2: Check LocalStorage (Best for quick local testing)
+  const stored = localStorage.getItem(CONFIG_KEY);
+  return stored ? JSON.parse(stored) : {};
 };
 
-export const saveState = (state: AppState) => {
-  const stateToSave = {
-    users: state.users,
-    patients: state.patients,
-    visits: state.visits
-  };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
+export const saveConfig = (config: AppConfig) => {
+  localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
+};
+
+export const clearConfig = () => {
+    localStorage.removeItem(CONFIG_KEY);
 };
